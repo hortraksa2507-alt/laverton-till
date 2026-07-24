@@ -1,10 +1,17 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { C, CATS, fmt, uid, MONO, DISPLAY, inputStyle } from "./constants.js";
 import { DEFAULT_MENU } from "./defaultMenu.js";
 import { PHOTOS } from "./photos.js";
 import { ItemPic, FoodIcon } from "./FoodIcon.jsx";
+import { getStore } from "./storage.js";
 
-const store = typeof window !== "undefined" && window.storage ? window.storage : null;
+function parsePrice(raw) {
+  const cleaned = String(raw ?? "").trim().replace(/[$\s]/g, "").replace(",", ".");
+  if (!cleaned) return null;
+  const p = parseFloat(cleaned);
+  if (Number.isNaN(p) || p < 0) return null;
+  return Math.round(p * 100) / 100;
+}
 
 export default function PriceBoard() {
   const [menu, setMenu] = useState(DEFAULT_MENU);
@@ -16,14 +23,20 @@ export default function PriceBoard() {
   const [delArmed, setDelArmed] = useState(false);
   const [resetArmed, setResetArmed] = useState(false);
   const [userPhotos, setUserPhotos] = useState({}); // id -> dataURL (photos the cashier uploaded)
+  const [saveMsg, setSaveMsg] = useState("");
   const fileRef = useRef(null);
+  const loadGen = useRef(0);
+  const autoSaveTimer = useRef(null);
 
   // ——— load saved menu (keep any price you set before, add new items) ———
   useEffect(() => {
+    const gen = ++loadGen.current;
     (async () => {
+      const store = getStore();
       if (!store) return;
       try {
         const r4 = await store.get("laverton-menu-v4");
+        if (gen !== loadGen.current) return;
         if (r4 && r4.value) {
           const m = JSON.parse(r4.value);
           if (Array.isArray(m) && m.length) {
@@ -39,6 +52,7 @@ export default function PriceBoard() {
       for (const key of ["laverton-menu-v3", "laverton-menu-v2", "laverton-menu-v1"]) {
         try {
           const r = await store.get(key);
+          if (gen !== loadGen.current) return;
           if (r && r.value) {
             const old = JSON.parse(r.value);
             if (Array.isArray(old) && old.length) {
@@ -60,6 +74,7 @@ export default function PriceBoard() {
   // ——— load photos the cashier uploaded before ———
   useEffect(() => {
     (async () => {
+      const store = getStore();
       if (!store) return;
       try {
         const r = await store.list("labphoto-");
@@ -78,10 +93,22 @@ export default function PriceBoard() {
   }, []);
 
   const saveMenu = async (m) => {
+    loadGen.current += 1;
     setMenu(m);
-    try { if (store) await store.set("laverton-menu-v4", JSON.stringify(m)); }
-    catch (e) { console.error("Could not save menu", e); }
+    const store = getStore();
+    try {
+      if (store) await store.set("laverton-menu-v4", JSON.stringify(m));
+      else setSaveMsg("Saved on screen only — storage blocked on this browser");
+    } catch (e) {
+      console.error("Could not save menu", e);
+      setSaveMsg("Could not save — storage may be full");
+    }
   };
+
+  const flashSaved = useCallback(() => {
+    setSaveMsg("Saved ✓");
+    window.setTimeout(() => setSaveMsg(""), 2000);
+  }, []);
 
   const photoSrc = (id) => {
     if (userPhotos[id]) return userPhotos[id];
@@ -106,11 +133,13 @@ export default function PriceBoard() {
 
   const savePhoto = async (id, dataUrl) => {
     setUserPhotos((p) => ({ ...p, [id]: dataUrl }));
+    const store = getStore();
     try { if (store) await store.set("labphoto-" + id, dataUrl); }
     catch (e) { console.error("Could not save photo", e); }
   };
   const removePhoto = async (id) => {
     setUserPhotos((p) => { const n = { ...p }; delete n[id]; return n; });
+    const store = getStore();
     try { if (store) await store.delete("labphoto-" + id); } catch (e) {}
   };
 
@@ -135,11 +164,18 @@ export default function PriceBoard() {
     e.target.value = "";
   };
 
-  const saveDraft = async () => {
-    const p = parseFloat(String(draft.price).replace(",", "."));
+  const saveDraft = async ({ closeAfter = false, silent = false } = {}) => {
+    if (!draft) return false;
+    const price = parsePrice(draft.price);
     const name = (draft.name || "").trim();
-    if (!name || isNaN(p) || p < 0) return;
-    const price = Math.round(p * 100) / 100;
+    if (!name) {
+      if (!silent) setSaveMsg("Enter a name");
+      return false;
+    }
+    if (price === null) {
+      if (!silent) setSaveMsg("Enter a valid price (e.g. 7.90)");
+      return false;
+    }
     if (sel === "__new__") {
       const id = uid();
       await saveMenu([...menu, { id, name, price, cat: draft.cat }]);
@@ -149,9 +185,23 @@ export default function PriceBoard() {
       await saveMenu(menu.map((m) => (m.id === sel ? { ...m, name, price, cat: draft.cat } : m)));
       if (draft.photo) await savePhoto(sel, draft.photo);
     }
-    setDraft((d) => ({ ...d, photo: null }));
-    setEditing(false);
+    setDraft((d) => ({ ...d, name, price: String(price), photo: null }));
+    if (closeAfter) setEditing(false);
+    else if (sel !== "__new__") setEditing(false);
+    if (!silent) flashSaved();
+    return true;
   };
+
+  const scheduleAutoSave = () => {
+    if (autoSaveTimer.current) window.clearTimeout(autoSaveTimer.current);
+    autoSaveTimer.current = window.setTimeout(() => {
+      saveDraft({ silent: true });
+    }, 600);
+  };
+
+  useEffect(() => () => {
+    if (autoSaveTimer.current) window.clearTimeout(autoSaveTimer.current);
+  }, []);
 
   const deleteItem = async () => {
     if (!delArmed) { setDelArmed(true); return; }
@@ -189,7 +239,7 @@ export default function PriceBoard() {
           <div style={{ fontFamily: DISPLAY, fontSize: 26, letterSpacing: "0.04em", lineHeight: 1.1, marginTop: 2 }}>
             PRICE <span style={{ color: C.gold }}>BOARD</span>
           </div>
-          <div style={{ color: C.muted, fontSize: 11.5, marginTop: 3 }}>Tap a product to see its price</div>
+          <div style={{ color: C.muted, fontSize: 11.5, marginTop: 3 }}>Tap a product — price saves automatically</div>
         </div>
         <button
           onClick={openNew}
@@ -304,6 +354,11 @@ export default function PriceBoard() {
                   <div style={{ fontFamily: DISPLAY, fontSize: 20, letterSpacing: "0.04em", marginBottom: 10 }}>
                     {sel === "__new__" ? "ADD NEW ITEM" : "EDIT ITEM"}
                   </div>
+                  {saveMsg && (
+                    <div style={{ color: saveMsg.startsWith("Saved") ? C.gold : C.red, fontSize: 13, fontWeight: 700, marginBottom: 10 }}>
+                      {saveMsg}
+                    </div>
+                  )}
                   {selItem && selItem.price <= 0 && (
                     <div style={{ background: "#3A2E17", border: `1px solid ${C.goldDim}`, color: C.gold, borderRadius: 10, padding: "8px 10px", fontSize: 13, marginBottom: 10 }}>
                       No price yet — set it once and it will be remembered.
@@ -325,11 +380,27 @@ export default function PriceBoard() {
                   {draft.photo && <div style={{ color: C.gold, fontSize: 12.5, marginTop: -6, marginBottom: 10 }}>✓ New photo ready — press Save to keep it</div>}
 
                   <label style={{ fontSize: 12, color: C.muted, letterSpacing: "0.1em" }}>NAME</label>
-                  <input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} style={inputStyle} />
+                  <input
+                    value={draft.name}
+                    onChange={(e) => { setDraft({ ...draft, name: e.target.value }); scheduleAutoSave(); }}
+                    onBlur={() => saveDraft({ silent: true })}
+                    style={inputStyle}
+                  />
                   <label style={{ fontSize: 12, color: C.muted, letterSpacing: "0.1em" }}>PRICE $</label>
-                  <input value={draft.price} onChange={(e) => setDraft({ ...draft, price: e.target.value })} inputMode="decimal" placeholder="e.g. 7.90" style={inputStyle} />
+                  <input
+                    value={draft.price}
+                    onChange={(e) => { setDraft({ ...draft, price: e.target.value }); scheduleAutoSave(); }}
+                    onBlur={() => saveDraft({ silent: true })}
+                    inputMode="decimal"
+                    placeholder="e.g. 7.90"
+                    style={inputStyle}
+                  />
                   <label style={{ fontSize: 12, color: C.muted, letterSpacing: "0.1em" }}>CATEGORY</label>
-                  <select value={draft.cat} onChange={(e) => setDraft({ ...draft, cat: e.target.value })} style={{ ...inputStyle, appearance: "none" }}>
+                  <select
+                    value={draft.cat}
+                    onChange={(e) => { setDraft({ ...draft, cat: e.target.value }); scheduleAutoSave(); }}
+                    style={{ ...inputStyle, appearance: "none" }}
+                  >
                     {CATS.map((c) => <option key={c} value={c}>{c}</option>)}
                   </select>
 
@@ -342,7 +413,7 @@ export default function PriceBoard() {
                     <button onClick={() => (sel === "__new__" ? close() : (setEditing(false), setDraft((d) => ({ ...d, photo: null }))))} style={{ background: "none", border: `1.5px solid ${C.line}`, color: C.muted, borderRadius: 12, padding: "12px 14px", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
                       Cancel
                     </button>
-                    <button onClick={saveDraft} style={{ flex: 1, background: C.gold, color: C.ink, border: "none", borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 800, cursor: "pointer" }}>
+                    <button onClick={() => saveDraft({ closeAfter: true })} style={{ flex: 1, background: C.gold, color: C.ink, border: "none", borderRadius: 12, padding: "13px", fontSize: 15, fontWeight: 800, cursor: "pointer" }}>
                       Save
                     </button>
                   </div>
