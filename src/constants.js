@@ -70,8 +70,15 @@ const ICONS = {
   h14: ["sroll"], h15: ["sandwich", I.red, I.yellow], h16: ["sandwich", I.red, I.yellow],
   h17: ["roll", I.red, I.yellow], h18: ["roll", I.red, I.yellow],
   h19: ["roll", I.ham, I.green],
-  k01: ["can", "#C8402F"], k02: ["can", "#E8B84A"], k03: ["bottle", "#C8402F"],
-  k04: ["bottle", "#7FB2D8"], k05: ["coffee"], k06: ["bottle", "#8A5A34"],
+  k01: ["coffee"], k02: ["coffee"], k03: ["bottle", "#E06A5A"], k04: ["bottle", "#D8A63F"],
+  k05: ["bottle", "#7FB2D8"], k06: ["can", "#6BAA3A"], k07: ["can", "#4A90D9"], k08: ["can", "#F09CB4"],
+  k09: ["can", "#B9AE99"], k10: ["can", "#C8402F"], k11: ["can", "#1C1712"], k12: ["can", "#7FA85A"],
+  k13: ["can", "#F2CE4B"], k14: ["can", "#F5E6C8"], k15: ["can", "#C8402F"],
+  k16: ["coffee"], k17: ["coffee"], k18: ["coffee"], k19: ["coffee"], k20: ["coffee"],
+  k21: ["bottle", "#C8402F"], k22: ["bottle", "#1C1712"], k23: ["bottle", "#7FA85A"],
+  k24: ["bottle", "#E0862F"], k25: ["bottle", "#6A2C91"], k26: ["bottle", "#F2CE4B"],
+  k36: ["can", "#6A2C91"], k43: ["can", "#8BC34A"], k59: ["can", "#E0862F"],
+  k61: ["bottle", "#6E4526"], k66: ["bottle", "#4A90D9"], k75: ["can", "#6BAA3A"],
 };
 const CAT_FALLBACK = {
   "Pies": ["pie", I.meat], "Sandwiches": ["sandwich", I.ham, I.green],

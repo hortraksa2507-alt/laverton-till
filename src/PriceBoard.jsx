@@ -42,7 +42,9 @@ export default function PriceBoard() {
           if (Array.isArray(m) && m.length) {
             const merged = [...m];
             DEFAULT_MENU.forEach((d) => {
-              if (!merged.some((x) => x.id === d.id)) merged.push(d);
+              const i = merged.findIndex((x) => x.id === d.id);
+              if (i === -1) merged.push(d);
+              else if (merged[i].price <= 0 && d.price > 0) merged[i] = { ...merged[i], name: d.name, price: d.price, cat: d.cat };
             });
             setMenu(merged);
             return;
@@ -188,7 +190,7 @@ export default function PriceBoard() {
     setDraft((d) => ({ ...d, name, price: String(price), photo: null }));
     if (closeAfter) setEditing(false);
     else if (sel !== "__new__") setEditing(false);
-    if (!silent) flashSaved();
+    flashSaved();
     return true;
   };
 
