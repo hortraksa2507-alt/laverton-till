@@ -31,3 +31,10 @@ export function installStorageShim() {
     },
   };
 }
+
+/** Resolve storage at call time — not at module load (shim may not exist yet). */
+export function getStore() {
+  return typeof window !== "undefined" && window.storage ? window.storage : null;
+}
+
+installStorageShim();

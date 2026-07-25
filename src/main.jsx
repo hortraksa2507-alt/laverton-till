@@ -1,9 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import "./storage.js";
 import App from "./App.jsx";
-import { installStorageShim } from "./storage.js";
-
-installStorageShim();
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
