@@ -26,7 +26,14 @@ export default function PriceBoard() {
         const r4 = await store.get("laverton-menu-v4");
         if (r4 && r4.value) {
           const m = JSON.parse(r4.value);
-          if (Array.isArray(m) && m.length) { setMenu(m); return; }
+          if (Array.isArray(m) && m.length) {
+            const merged = [...m];
+            DEFAULT_MENU.forEach((d) => {
+              if (!merged.some((x) => x.id === d.id)) merged.push(d);
+            });
+            setMenu(merged);
+            return;
+          }
         }
       } catch (e) { /* no v4 yet */ }
       for (const key of ["laverton-menu-v3", "laverton-menu-v2", "laverton-menu-v1"]) {

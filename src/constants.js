@@ -69,6 +69,7 @@ const ICONS = {
   h10: ["fritter"], h11: ["dimsim"], h12: ["wing"], h13: ["fritter"],
   h14: ["sroll"], h15: ["sandwich", I.red, I.yellow], h16: ["sandwich", I.red, I.yellow],
   h17: ["roll", I.red, I.yellow], h18: ["roll", I.red, I.yellow],
+  h19: ["roll", I.ham, I.green],
   k01: ["can", "#C8402F"], k02: ["can", "#E8B84A"], k03: ["bottle", "#C8402F"],
   k04: ["bottle", "#7FB2D8"], k05: ["coffee"], k06: ["bottle", "#8A5A34"],
 };
