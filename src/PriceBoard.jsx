@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { C, CATS, fmt, uid, MONO, DISPLAY, inputStyle } from "./constants.js";
-import { DEFAULT_MENU } from "./defaultMenu.js";
+import { DEFAULT_MENU, BOARD_PRICE_SYNC } from "./defaultMenu.js";
 import { PHOTOS } from "./photos.js";
 import { ItemPic, FoodIcon } from "./FoodIcon.jsx";
 import { getStore } from "./storage.js";
@@ -45,6 +45,9 @@ export default function PriceBoard() {
               const i = merged.findIndex((x) => x.id === d.id);
               if (i === -1) merged.push(d);
               else if (merged[i].price <= 0 && d.price > 0) merged[i] = { ...merged[i], name: d.name, price: d.price, cat: d.cat };
+              else if (d.price > 0 && BOARD_PRICE_SYNC[d.id]?.includes(merged[i].price)) {
+                merged[i] = { ...merged[i], name: d.name, price: d.price, cat: d.cat };
+              }
             });
             setMenu(merged);
             return;

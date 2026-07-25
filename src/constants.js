@@ -14,7 +14,7 @@ export const C = {
   red: "#E06A5A",
 };;
 
-export const CATS = ["Pies", "Sandwiches", "Rolls & Buns", "Sweets", "Hot Food", "Drinks"];;
+export const CATS = ["Pies", "Sandwiches", "Rolls & Buns", "Sweets", "Hot Food", "Extras", "Drinks"];;
 
 // ————— illustration palette —————
 const I = {
@@ -83,7 +83,7 @@ const ICONS = {
 const CAT_FALLBACK = {
   "Pies": ["pie", I.meat], "Sandwiches": ["sandwich", I.ham, I.green],
   "Rolls & Buns": ["roll", I.green, I.red], "Sweets": ["slice", I.caramel, I.biscuit, null],
-  "Hot Food": ["potatocake"], "Drinks": ["can", "#9C907A"],
+  "Hot Food": ["potatocake"], "Extras": ["tag"], "Drinks": ["can", "#9C907A"],
 };
 
 const fmt = (n) => "$" + (Math.round(n * 100) / 100).toFixed(2);

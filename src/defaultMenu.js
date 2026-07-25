@@ -84,8 +84,8 @@ export const DEFAULT_MENU = [
   { id: "d32", name: "Marshmallow Stick", price: 4.5, cat: "Sweets" },
   { id: "d33", name: "Choc Mud / Lemon Sorbet Log", price: 3.5, cat: "Sweets" },
   // —— Hot Food (prices from shop hot food menu board) ——
-  { id: "h02", name: "Potato Cake", price: 1.4, cat: "Hot Food" },
-  { id: "h11", name: "Small Dim Sim", price: 1.4, cat: "Hot Food" },
+  { id: "h02", name: "Potato Cake", price: 1.6, cat: "Hot Food" },
+  { id: "h11", name: "Small Dim Sim", price: 1.6, cat: "Hot Food" },
   { id: "h04", name: "Home Made Dim Sim", price: 2.9, cat: "Hot Food" },
   { id: "h12", name: "Chicken Sweet Chilli Tender", price: 2.5, cat: "Hot Food" },
   { id: "h06", name: "Chicken Wings", price: 2.5, cat: "Hot Food" },
@@ -94,15 +94,23 @@ export const DEFAULT_MENU = [
   { id: "h14", name: "Lasagna Topper", price: 3.9, cat: "Hot Food" },
   { id: "h05", name: "Spring Roll", price: 3.5, cat: "Hot Food" },
   { id: "h10", name: "Hot Chips", price: 4.5, cat: "Hot Food" },
-  { id: "h01", name: "Corn Dog", price: 3.0, cat: "Hot Food" },
+  { id: "h01", name: "Corn Dog", price: 3.5, cat: "Hot Food" },
   { id: "h15", name: "Bacon & Egg Toasted", price: 8.0, cat: "Hot Food" },
   { id: "h16", name: "Bacon & Cheese Toasted", price: 8.5, cat: "Hot Food" },
-  { id: "h17", name: "Bacon & Egg Roll (Hot)", price: 9.0, cat: "Hot Food" },
-  { id: "h18", name: "Bacon & Cheese Roll (Hot)", price: 9.5, cat: "Hot Food" },
-  { id: "h19", name: "Hot Sandwich / Roll (Ham, Beef, Chicken or Salami)", price: 7.0, cat: "Hot Food" },
-  { id: "h08", name: "Kransky Sausage", price: 6.0, cat: "Hot Food" },
+  { id: "h17", name: "Bacon & Egg Roll", price: 9.0, cat: "Hot Food" },
+  { id: "h18", name: "Bacon & Cheese Roll", price: 9.5, cat: "Hot Food" },
+  { id: "h19", name: "Sandwich / Roll (Ham, Beef, Chicken or Salami)", price: 7.0, cat: "Hot Food" },
+  { id: "h08", name: "Kransky Sausage (Normal, Ham & Cheese, Spicy or Extra Spicy)", price: 6.0, cat: "Hot Food" },
   { id: "h03", name: "Hash Brown", price: 0, cat: "Hot Food" },
   { id: "h09", name: "Bacon Fritter", price: 0, cat: "Hot Food" },
+  // —— Extras (hot food menu board) ——
+  { id: "e01", name: "Cheese", price: 1.0, cat: "Extras" },
+  { id: "e02", name: "Boiled Egg", price: 1.5, cat: "Extras" },
+  { id: "e03", name: "Grilled Egg", price: 1.5, cat: "Extras" },
+  { id: "e04", name: "Cooked Onion", price: 1.0, cat: "Extras" },
+  { id: "e05", name: "Salad (per item)", price: 0.5, cat: "Extras" },
+  { id: "e06", name: "Extra Meat Filling", price: 1.5, cat: "Extras" },
+  { id: "e07", name: "Toasting", price: 0.5, cat: "Extras" },
   // —— Drinks (fridge price tags) ——
   // Nippy's cartons — $3.90
   { id: "k01", name: "Nippy's Iced Coffee (Carton)", price: 3.9, cat: "Drinks" },
@@ -193,3 +201,10 @@ export const DEFAULT_MENU = [
   { id: "k78", name: "V Energy Tropical 500ml", price: 6.5, cat: "Drinks" },
   { id: "k79", name: "V Energy Grape 500ml", price: 6.5, cat: "Drinks" },
 ];
+
+/** Old default prices — auto-upgrade saved menus when these still match. */
+export const BOARD_PRICE_SYNC = {
+  h02: [1.4],
+  h11: [1.4],
+  h01: [3.0],
+};
